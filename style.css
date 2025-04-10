@@ -1,0 +1,114 @@
+/* Basic styling for the whole page */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center; /* Center the chat container */
+}
+
+/* Container for the chat interface */
+#chat-container {
+    width: 100%;
+    max-width: 600px; /* Limit maximum width */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    height: 80vh; /* Use viewport height, but not full */
+    overflow: hidden; /* Hide anything that overflows */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    padding: 15px;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.2em;
+}
+
+/* Area where messages are displayed */
+#chat-output {
+    flex-grow: 1; /* Takes up available vertical space */
+    overflow-y: auto; /* Add scrollbar if content overflows vertically */
+    padding: 15px;
+    display: flex;
+    flex-direction: column; /* Stack messages vertically */
+}
+
+/* General styling for any message */
+.message {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%; /* Messages don't take full width */
+    line-height: 1.4;
+}
+
+/* Styling for user messages */
+.user-message {
+    background-color: #007bff; /* Blue background */
+    color: white;
+    align-self: flex-end; /* Align user messages to the right */
+    border-bottom-right-radius: 5px; /* Slightly flatten corner */
+}
+
+/* Styling for AI messages */
+.ai-message {
+    background-color: #e9e9eb; /* Light gray background */
+    color: #333;
+    align-self: flex-start; /* Align AI messages to the left */
+    border-bottom-left-radius: 5px; /* Slightly flatten corner */
+}
+
+/* Style paragraphs inside messages (removes default margins) */
+.message p {
+    margin: 0;
+}
+
+/* Loading indicator */
+#loading-indicator {
+    text-align: center;
+    padding: 10px;
+    color: #888;
+    font-style: italic;
+}
+
+
+/* Container for the input field and send button */
+#input-area {
+    display: flex; /* Arrange input and button side-by-side */
+    padding: 15px;
+    border-top: 1px solid #eee;
+    background-color: #f9f9f9;
+}
+
+/* Text input field */
+#user-input {
+    flex-grow: 1; /* Input field takes available horizontal space */
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 1em;
+}
+
+/* Send button */
+#send-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer; /* Indicate it's clickable */
+    font-size: 1em;
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+/* Change button color on hover */
+#send-button:hover {
+    background-color: #0056b3;
+}
