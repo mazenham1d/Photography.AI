@@ -1,91 +1,112 @@
-// Get references to the HTML elements we need to interact with
-const chatOutput = document.getElementById('chat-output');
-const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-button');
-const loadingIndicator = document.getElementById('loading-indicator');
+// filename: script.js
+document.addEventListener('DOMContentLoaded', () => {
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
 
-// --- IMPORTANT: Replace this with the actual URL of your backend API endpoint ---
-const BACKEND_URL = 'http://127.0.0.1:5000/api/chat';
-
-
-// Function to add a message to the chat output
-function addMessage(sender, text) {
-    const messageDiv = document.createElement('div'); // Create a new <div> element
-    messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message'); // Add CSS classes
-
-    const paragraph = document.createElement('p'); // Create a <p> element for the text
-    paragraph.textContent = text; // Set the text content
-
-    messageDiv.appendChild(paragraph); // Put the <p> inside the <div>
-    chatOutput.appendChild(messageDiv); // Add the new message <div> to the chat output area
-
-    // Scroll to the bottom of the chat output to see the latest message
-    chatOutput.scrollTop = chatOutput.scrollHeight;
-}
-
-// Function to handle sending a message
-async function handleSendMessage() {
-    const userText = userInput.value.trim(); // Get text from input, remove whitespace
-
-    if (userText === '') {
-        return; // Do nothing if input is empty
+    // Basic check if elements exist
+    if (!chatMessages || !userInput || !sendButton) {
+        console.error("Error: One or more chat elements (chat-messages, user-input, send-button) not found in the HTML.");
+        // Optionally disable input/button if elements are missing
+        if(userInput) userInput.disabled = true;
+        if(sendButton) sendButton.disabled = true;
+        // Display an error message in the chat area if possible
+        if(chatMessages) {
+             const errorElement = document.createElement('div');
+             errorElement.style.color = 'red';
+             errorElement.textContent = "Chat interface failed to load correctly. Please check HTML element IDs.";
+             chatMessages.appendChild(errorElement);
+        }
+        return; // Stop script execution if critical elements are missing
     }
 
-    // 1. Display the user's message immediately
-    addMessage('user', userText);
-    userInput.value = ''; // Clear the input field
-    userInput.disabled = true; // Disable input while waiting for AI
-    sendButton.disabled = true; // Disable button while waiting for AI
-    loadingIndicator.style.display = 'block'; // Show the 'Thinking...' indicator
 
-    // 2. Send the message to the backend and get the AI response
-    try {
-        // Use the 'fetch' API to send a POST request to your backend
-        const response = await fetch(BACKEND_URL, {
-            method: 'POST', // HTTP method
-            headers: {
-                'Content-Type': 'application/json', // Tell the backend we're sending JSON
-            },
-            // IMPORTANT: The structure of this body MUST match what your backend expects!
-            body: JSON.stringify({ message: userText }), // Convert JS object to JSON string
-        });
+    // Function to add a message to the chat display
+    function addMessage(sender, text) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender); // 'user' or 'assistant'
 
-        // Check if the request was successful (status code 200-299)
-        if (!response.ok) {
-            // If not okay, throw an error to be caught by the catch block
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        // Basic text setting
+        bubble.textContent = text;
+
+        messageElement.appendChild(bubble);
+        chatMessages.appendChild(messageElement);
+        // Scroll to the bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Function to handle sending messages
+    async function sendMessage() {
+        const message = userInput.value.trim();
+
+        if (message === "") {
+             return; // Don't send empty messages
         }
 
-        // Parse the JSON response from the backend
-        // IMPORTANT: The structure of this 'data' object depends on what your backend sends!
-        // We assume it sends an object like: { "reply": "The AI's answer..." }
-        const data = await response.json();
+        // Display user message immediately
+        addMessage('user', message);
+        userInput.value = ''; // Clear input field
 
-        // 3. Display the AI's response
-        addMessage('ai', data.reply); // Adjust 'data.reply' if your backend uses a different key
+        // Disable input/button while waiting for response
+        userInput.disabled = true;
+        sendButton.disabled = true;
 
-    } catch (error) {
-        // 4. Handle errors (network issue, backend error)
-        console.error('Error fetching AI response:', error);
-        addMessage('ai', "Sorry, I encountered an error. Please try again. (" + error.message + ")");
-    } finally {
-        // 5. Re-enable input and hide loading indicator regardless of success or error
-        loadingIndicator.style.display = 'none'; // Hide 'Thinking...'
-        userInput.disabled = false; // Re-enable input
-        sendButton.disabled = false; // Re-enable button
-        userInput.focus(); // Put the cursor back in the input field
+        try {
+            // Send message to backend
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: message }),
+            });
+
+            if (!response.ok) {
+                 // Try to get error message from backend response if possible
+                 let errorMsg = `Error: ${response.status} ${response.statusText}`;
+                 try {
+                     const errorData = await response.json();
+                     errorMsg = errorData.error || JSON.stringify(errorData);
+                 } catch (e) {
+                     // Ignore if error response isn't JSON
+                 }
+                throw new Error(errorMsg); // Throw detailed error if possible
+            }
+
+            const data = await response.json();
+
+            // Display assistant response
+            if (data && data.response) {
+                addMessage('assistant', data.response);
+            } else {
+                 addMessage('assistant', "Sorry, I received an unexpected response.");
+                 console.error("Unexpected response data structure:", data); // Log unexpected structure
+            }
+
+        } catch (error) {
+            console.error('Error sending/receiving message:', error);
+            // Display specific error in chat
+            addMessage('assistant', `Sorry, an error occurred: ${error.message}`);
+        } finally {
+             // Re-enable input/button regardless of success or failure
+             userInput.disabled = false;
+             sendButton.disabled = false;
+             userInput.focus(); // Put cursor back in input field
+        }
     }
-}
 
-// --- Event Listeners ---
+    // --- Event Listeners ---
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent default Enter behavior (like submitting a form)
+            sendMessage();
+        }
+    });
 
-// Send message when the button is clicked
-sendButton.addEventListener('click', handleSendMessage);
+    // Add an initial greeting
+     addMessage('assistant', 'Hello! Ask me anything about Photography.');
 
-// Send message when the user presses 'Enter' in the input field
-userInput.addEventListener('keypress', function(event) {
-    // Check if the key pressed was 'Enter'
-    if (event.key === 'Enter') {
-        handleSendMessage(); // Call the same function as the button click
-    }
-});
+}); // End of DOMContentLoaded

@@ -3,31 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Chat App</title>
-    <!-- Link to our CSS file for styling -->
+    <title>Dustin Photography AI Assistant</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="chat-container">
+        <h1> Photography AI Assistant</h1>
 
-    <div id="chat-container">
-        <h1>A.L.W</h1>
-        <!-- This div will display the chat messages -->
-        <div id="chat-output">
-            <div class="message ai-message">
-                <p>Hello! Ask me anything.</p>
+        <div id="chat-messages">
             </div>
-        </div>
-         <!-- Loading indicator (hidden initially) -->
-        <div id="loading-indicator" style="display: none;">Thinking...</div>
-        <!-- Input area for the user -->
-        <div id="input-area">
-            <input type="text" id="user-input" placeholder="Type your message here...">
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask about reviews...">
             <button id="send-button">Send</button>
         </div>
     </div>
 
-    <!-- Link to our JavaScript file for interactivity -->
-    <!-- IMPORTANT: Put this at the end of the body so HTML elements are loaded first -->
     <script src="script.js"></script>
 </body>
 </html>
